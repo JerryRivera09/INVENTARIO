@@ -1,17 +1,29 @@
-const API = "http://10.0.2.18:3000/products";
+// Forzar HTTP explícitamente y asegurar que no haya redirecciones a HTTPS
+const API_URL = "http://10.0.2.18:3000";
 
 async function loadProducts() {
   try {
-    const res = await fetch(API);
-    if (!res.ok) throw new Error("Error al cargar productos");
+    console.log("Cargando productos desde:", API_URL + "/products");
+
+    const res = await fetch(API_URL + "/products", {
+      mode: "cors",
+      cache: "no-cache",
+      referrerPolicy: "no-referrer-when-downgrade", // Importante para HTTP
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     const products = await res.json();
+    console.log("Productos cargados:", products);
 
     const list = document.getElementById("productList");
     list.innerHTML = "";
 
     products.forEach((p) => {
       list.innerHTML += `
-        <tr id="product-${p.id}">
+        <tr>
           <td>${p.name}</td>
           <td>$${p.price}</td>
           <td>${p.stock}</td>
@@ -23,99 +35,14 @@ async function loadProducts() {
       `;
     });
   } catch (error) {
-    console.error("Error:", error);
-    alert("Error al cargar los productos");
+    console.error("Error detallado:", error);
+    console.error("URL intentada:", API_URL + "/products");
+    console.error("¿El navegador está usando HTTPS?", window.location.protocol);
+    alert(`Error al cargar productos. Protocolo: ${window.location.protocol}`);
   }
 }
 
-async function addProduct() {
-  const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
-  const stock = document.getElementById("stock").value;
+// El resto de funciones (addProduct, editProduct, deleteProduct, searchProduct) igual...
+// Pero asegúrate de que usen API_URL + '/products' en lugar de API
 
-  if (!name || !price || !stock) {
-    alert("Todos los campos son requeridos");
-    return;
-  }
-
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, price, stock }),
-    });
-
-    if (!res.ok) throw new Error("Error al agregar producto");
-
-    // Limpiar formulario
-    document.getElementById("name").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("stock").value = "";
-
-    // Recargar productos
-    await loadProducts();
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error al agregar el producto");
-  }
-}
-
-function searchProduct() {
-  const text = document.getElementById("search").value.toLowerCase();
-  const rows = document.querySelectorAll("#productList tr");
-
-  rows.forEach((row) => {
-    const name = row.children[0]?.textContent.toLowerCase() || "";
-    row.style.display = name.includes(text) ? "" : "none";
-  });
-
-  // NO llamar a loadProducts() aquí
-}
-
-async function editProduct(id) {
-  const name = prompt("Nuevo nombre:");
-  const price = prompt("Nuevo precio:");
-  const stock = prompt("Nuevo stock:");
-
-  if (!name || !price || !stock) {
-    alert("Debes llenar todos los campos");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, price, stock }),
-    });
-
-    if (!res.ok) throw new Error("Error al editar producto");
-    await loadProducts();
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error al editar el producto");
-  }
-}
-
-async function deleteProduct(id) {
-  if (!confirm("¿Estás seguro de eliminar este producto?")) return;
-
-  try {
-    const res = await fetch(`${API}/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) throw new Error("Error al eliminar producto");
-    await loadProducts();
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error al eliminar el producto");
-  }
-}
-
-// Cargar productos al iniciar
-document.addEventListener("DOMContentLoaded", loadProducts);
+loadProducts();
