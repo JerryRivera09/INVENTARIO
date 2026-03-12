@@ -1,25 +1,31 @@
 const API = "http://10.0.2.18:3000/products";
 
 async function loadProducts() {
-  const res = await fetch(API);
-  const products = await res.json();
+  try {
+    const res = await fetch(API);
+    if (!res.ok) throw new Error("Error al cargar productos");
+    const products = await res.json();
 
-  const list = document.getElementById("productList");
-  list.innerHTML = "";
+    const list = document.getElementById("productList");
+    list.innerHTML = "";
 
-  products.forEach((p) => {
-    list.innerHTML += `
-        <tr>
-            <td>${p.name}</td>
-            <td>$${p.price}</td>
-            <td>${p.stock}</td>
-            <td>
-                <button onclick="editProduct(${p.id})">Editar</button>
-                <button onclick="deleteProduct(${p.id})">Eliminar</button>
-            </td>
+    products.forEach((p) => {
+      list.innerHTML += `
+        <tr id="product-${p.id}">
+          <td>${p.name}</td>
+          <td>$${p.price}</td>
+          <td>${p.stock}</td>
+          <td>
+            <button onclick="editProduct(${p.id})">Editar</button>
+            <button onclick="deleteProduct(${p.id})">Eliminar</button>
+          </td>
         </tr>
-    `;
-  });
+      `;
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al cargar los productos");
+  }
 }
 
 async function addProduct() {
@@ -27,31 +33,47 @@ async function addProduct() {
   const price = document.getElementById("price").value;
   const stock = document.getElementById("stock").value;
 
-  await fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, price, stock }),
-  });
+  if (!name || !price || !stock) {
+    alert("Todos los campos son requeridos");
+    return;
+  }
+
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, price, stock }),
+    });
+
+    if (!res.ok) throw new Error("Error al agregar producto");
+
+    // Limpiar formulario
+    document.getElementById("name").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("stock").value = "";
+
+    // Recargar productos
+    await loadProducts();
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al agregar el producto");
+  }
 }
 
 function searchProduct() {
   const text = document.getElementById("search").value.toLowerCase();
-  const rows = document.querySelectorAll("tbody tr");
+  const rows = document.querySelectorAll("#productList tr");
 
   rows.forEach((row) => {
-    const name = row.children[0].textContent.toLowerCase();
-
-    if (name.includes(text)) {
-      row.style.display = "";
-    } else {
-      row.style.display = "none";
-    }
+    const name = row.children[0]?.textContent.toLowerCase() || "";
+    row.style.display = name.includes(text) ? "" : "none";
   });
-  loadProducts();
+
+  // NO llamar a loadProducts() aquí
 }
-//EDITAR
+
 async function editProduct(id) {
   const name = prompt("Nuevo nombre:");
   const price = prompt("Nuevo precio:");
@@ -62,27 +84,38 @@ async function editProduct(id) {
     return;
   }
 
-  await fetch(`${API}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: name,
-      price: price,
-      stock: stock,
-    }),
-  });
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, price, stock }),
+    });
 
-  loadProducts();
+    if (!res.ok) throw new Error("Error al editar producto");
+    await loadProducts();
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al editar el producto");
+  }
 }
 
 async function deleteProduct(id) {
-  await fetch(`${API}/${id}`, {
-    method: "DELETE",
-  });
+  if (!confirm("¿Estás seguro de eliminar este producto?")) return;
 
-  loadProducts();
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar producto");
+    await loadProducts();
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al eliminar el producto");
+  }
 }
 
-loadProducts();
+// Cargar productos al iniciar
+document.addEventListener("DOMContentLoaded", loadProducts);
