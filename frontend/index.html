@@ -8,13 +8,27 @@
 </head>
 <body>
     <h2>Inventario</h2>
-
+    <input type="text" id="search" placeholder="Buscar producto">
+    <button onclick="searchProduct()">Buscar</button>
+<br><br>
     <input type="text" id="name" placeholder="Nombre">
     <input type="number" id="price" placeholder="Precio">
     <input type="number" id="stock" placeholder="Stock">
 <button onclick="addProduct()">Agregar</button>
 
-<ul id="productList"></ul>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="productList"></tbody>
+</table>
+
+
 
 <script src="app.js"></script>
 </body>

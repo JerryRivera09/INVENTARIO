@@ -8,13 +8,18 @@ async function loadProducts() {
     list.innerHTML = "";
 
     products.forEach(p => {
-        list.innerHTML += `
-            <li>
-                ${p.name} - $${p.price} - Stock: ${p.stock}
+    list.innerHTML += `
+        <tr>
+            <td>${p.name}</td>
+            <td>$${p.price}</td>
+            <td>${p.stock}</td>
+            <td>
+                <button onclick="editProduct(${p.id})">Editar</button>
                 <button onclick="deleteProduct(${p.id})">Eliminar</button>
-            </li>
-        `;
-    });
+            </td>
+        </tr>
+    `;
+});
 }
 
 async function addProduct() {
@@ -30,11 +35,62 @@ async function addProduct() {
         body: JSON.stringify({ name, price, stock })
     });
 
+    
+}
+
+
+
+function searchProduct() {
+
+    const text = document.getElementById("search").value.toLowerCase();
+    const rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+
+        const name = row.children[0].textContent.toLowerCase();
+
+        if (name.includes(text)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+
+    });
+    loadProducts();
+}
+//EDITAR
+async function editProduct(id) {
+
+    const name = prompt("Nuevo nombre:");
+    const price = prompt("Nuevo precio:");
+    const stock = prompt("Nuevo stock:");
+
+    if(!name || !price || !stock){
+        alert("Debes llenar todos los campos");
+        return;
+    }
+
+    await fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            price: price,
+            stock: stock
+        })
+    });
+
     loadProducts();
 }
 
 async function deleteProduct(id) {
-    await fetch(`${API}/${id}`, { method: "DELETE" });
+
+    await fetch(`${API}/${id}`, {
+        method: "DELETE"
+    });
+
     loadProducts();
 }
 

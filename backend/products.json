@@ -1,20 +1,20 @@
 [
   {
-    "id": 1772562022735,
-    "name": "Mouse",
-    "price": 50000,
-    "stock": 5
-  },
-  {
-    "id": 1772562606931,
-    "name": "Abanico",
-    "price": "6",
-    "stock": "23"
-  },
-  {
     "id": 1772562924968,
     "name": "Portatil",
     "price": "4000000",
     "stock": "12"
+  },
+  {
+    "id": 1772582199202,
+    "name": "escoba",
+    "price": "22222",
+    "stock": "3"
+  },
+  {
+    "id": 1773272336538,
+    "name": "Pantalon",
+    "price": "25000",
+    "stock": "4"
   }
 ]
