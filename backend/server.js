@@ -22,31 +22,31 @@ app.listen(3000, () => {
 });
 
 // GET
-app.get('/products', (req, res) => {
-    res.json(products);
+app.get("/products", (req, res) => {
+  res.json(products);
 });
 
 // POST
-app.post('/products', (req, res) => {
-    const newProduct = {
-        id: Date.now(),
-        name: req.body.name,
-        price: req.body.price,
-        stock: req.body.stock
-    };
+app.post("/products", (req, res) => {
+  const newProduct = {
+    id: Date.now(),
+    name: req.body.name,
+    price: req.body.price,
+    stock: req.body.stock,
+  };
 
-    products.push(newProduct);
-    fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
-    res.json(newProduct);
+  products.push(newProduct);
+  fs.writeFileSync("./products.json", JSON.stringify(products, null, 2));
+  res.json(newProduct);
 });
 
 // DELETE
-app.delete('/products/:id', (req, res) => {
-    products = products.filter(p => p.id != req.params.id);
-    fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
-    res.json({ message: "Producto eliminado" });
+app.delete("/products/:id", (req, res) => {
+  products = products.filter((p) => p.id != req.params.id);
+  fs.writeFileSync("./products.json", JSON.stringify(products, null, 2));
+  res.json({ message: "Producto eliminado" });
 });
 
-app.listen(3000, () => {
-    console.log("Servidor corriendo en puerto 3000");
+app.listen(3000, "0.0.0.0", () => {
+  console.log("Servidor corriendo en puerto 3000");
 });
