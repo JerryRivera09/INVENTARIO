@@ -1,12 +1,25 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const routes = require("./routes");
+
 const app = express();
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-let products = require('./products.json');
+app.use("/products", routes);
+
+// servir frontend
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
+app.listen(3000, () => {
+    console.log("Servidor corriendo en puerto 3000");
+});
 
 // GET
 app.get('/products', (req, res) => {

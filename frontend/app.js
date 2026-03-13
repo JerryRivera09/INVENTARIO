@@ -35,10 +35,8 @@ async function addProduct() {
         body: JSON.stringify({ name, price, stock })
     });
 
-    
+    loadProducts();
 }
-
-
 
 function searchProduct() {
 
@@ -58,6 +56,7 @@ function searchProduct() {
     });
     loadProducts();
 }
+
 //EDITAR
 async function editProduct(id) {
 

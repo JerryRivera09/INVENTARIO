@@ -1,29 +1,48 @@
 const express = require('express');
-const fs = require('fs');
 const router = express.Router();
+const db = require('./db');
 
-let products = require('./products.json');
+
+
 
 // GET
 router.get('/', (req, res) => {
-    res.json(products);
+
+    db.query("SELECT * FROM products", (err, results) => {
+        if (err) {
+            res.status(500).json(err);
+            return;
+        }
+
+        res.json(results);
+    });
+
 });
 
 // POST
 router.post('/', (req, res) => {
 
-    const newProduct = {
-        id: Date.now(),
-        name: req.body.name,
-        price: req.body.price,
-        stock: req.body.stock
-    };
+    const { name, price, stock } = req.body;
 
-    products.push(newProduct);
+    db.query(
+        "INSERT INTO products (name, price, stock) VALUES (?, ?, ?)",
+        [name, price, stock],
+        (err, result) => {
 
-    fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
+            if (err) {
+                res.status(500).json(err);
+                return;
+            }
 
-    res.json(newProduct);
+            res.json({
+                id: result.insertId,
+                name,
+                price,
+                stock
+            });
+        }
+    );
+
 });
 
 // DELETE
@@ -31,32 +50,41 @@ router.delete('/:id', (req, res) => {
 
     const id = req.params.id;
 
-    products = products.filter(p => p.id != id);
+    db.query(
+        "DELETE FROM products WHERE id = ?",
+        [id],
+        (err, result) => {
 
-    fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
+            if (err) {
+                res.status(500).json(err);
+                return;
+            }
 
-    res.json({ message: "Producto eliminado" });
+            res.json({ message: "Producto eliminado" });
+        }
+    );
+
 });
 
 router.put('/:id', (req, res) => {
 
     const id = req.params.id;
+    const { name, price, stock } = req.body;
 
-    products = products.map(p => {
-        if (p.id == id) {
-            return {
-                ...p,
-                name: req.body.name,
-                price: req.body.price,
-                stock: req.body.stock
-            };
+    db.query(
+        "UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?",
+        [name, price, stock, id],
+        (err, result) => {
+
+            if (err) {
+                res.status(500).json(err);
+                return;
+            }
+
+            res.json({ message: "Producto actualizado" });
         }
-        return p;
-    });
+    );
 
-    fs.writeFileSync('./products.json', JSON.stringify(products, null, 2));
-
-    res.json({ message: "Producto actualizado" });
 });
 
 module.exports = router;
