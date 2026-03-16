@@ -1,9 +1,9 @@
 const mysql = require("mysql2");
 
 const db = mysql.createConnection({
-  host: "localhost",
+  host: "inventario-db.c4noiqemgjse.us-east-1.rds.amazonaws.com",
   user: "root",
-  password: "admin", // tu contraseña
+  password: "admin123", // tu contraseña
   database: "inventario",
 });
 
